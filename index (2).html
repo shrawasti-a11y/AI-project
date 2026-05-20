@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PriceWise India — AI House Price Predictor</title>
+
+  <!-- Fonts: Syne (display) + DM Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <!-- Chart.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+
+  <!-- ═══ PARTICLE BACKGROUND ═══ -->
+  <canvas id="particles-canvas" aria-hidden="true"></canvas>
+
+  <!-- ═══ HEADER ═══ -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-badge">PW</div>
+        <div class="logo-words">
+          <span class="logo-title">PriceWise</span>
+          <span class="logo-tagline">India</span>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <a href="#predict-section" class="nav-link">
+          <span class="nav-dot"></span>Predict
+        </a>
+        <a href="#stats-section" class="nav-link">
+          <span class="nav-dot"></span>Dataset
+        </a>
+        <a href="#about-section" class="nav-link">
+          <span class="nav-dot"></span>About
+        </a>
+      </nav>
+      <div class="header-badge">
+        <span class="pulse-dot"></span>
+        Model Live
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ HERO ═══ -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-pill">
+        <span class="pill-spark">✦</span>
+        AI-Powered Real Estate Intelligence
+      </div>
+      <h1 class="hero-title">
+        Predict House Prices
+        <span class="hero-title-accent">Across India</span>
+      </h1>
+      <p class="hero-sub">
+        A <strong>Random Forest ML model</strong> trained on
+        <strong>{{ stats.total_records | default('14,619') }}</strong> real Indian housing
+        transactions — originally built in MATLAB, now deployed at scale.
+      </p>
+      <div class="hero-cta-row">
+        <a href="#predict-section" class="cta-primary">
+          <span>Estimate My Property</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#stats-section" class="cta-secondary">View Dataset →</a>
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+      <div class="hv-ring hv-ring-1"></div>
+      <div class="hv-ring hv-ring-2"></div>
+      <div class="hv-ring hv-ring-3"></div>
+      <div class="hv-center">
+        <div class="hv-icon">🏡</div>
+        <div class="hv-label">R² {{ metrics.r2 | default('77.1') }}%</div>
+      </div>
+      <div class="hv-float hv-f1">₹4,50,000<span>Budget</span></div>
+      <div class="hv-float hv-f2">₹12,00,000<span>Premium</span></div>
+      <div class="hv-float hv-f3">₹38,00,000<span>Luxury</span></div>
+    </div>
+  </section>
+
+  <!-- ═══ STATS STRIP ═══ -->
+  <section id="stats-section" class="stats-strip">
+    <div class="stats-inner">
+      <div class="stats-label">Dataset Overview</div>
+      <div class="stats-grid">
+
+        <div class="stat-card s-blue">
+          <div class="stat-icon">🗃️</div>
+          <div class="stat-value counter" data-target="{{ stats.total_records | default(14619) }}">0</div>
+          <div class="stat-label">Training Records</div>
+        </div>
+
+        <div class="stat-card s-emerald">
+          <div class="stat-icon">📈</div>
+          <div class="stat-value">{{ metrics.r2 | default('77.1') }}<span class="stat-unit">%</span></div>
+          <div class="stat-label">Model Accuracy R²</div>
+        </div>
+
+        <div class="stat-card s-amber">
+          <div class="stat-icon">💰</div>
+          <div class="stat-value">₹{{ "{:,}".format(stats.avg_price | default(538806)) }}</div>
+          <div class="stat-label">Average Price</div>
+        </div>
+
+        <div class="stat-card s-rose">
+          <div class="stat-icon">⬇️</div>
+          <div class="stat-value">₹{{ "{:,}".format(stats.min_price | default(78000)) }}</div>
+          <div class="stat-label">Lowest Price</div>
+        </div>
+
+        <div class="stat-card s-violet">
+          <div class="stat-icon">⬆️</div>
+          <div class="stat-value">₹{{ "{:,}".format(stats.max_price | default(7700000)) }}</div>
+          <div class="stat-label">Highest Price</div>
+        </div>
+
+        <div class="stat-card s-teal">
+          <div class="stat-icon">🧠</div>
+          <div class="stat-value">10</div>
+          <div class="stat-label">Features Used</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PREDICT SECTION ═══ -->
+  <main id="predict-section" class="main-content">
+    <div class="section-header">
+      <span class="section-eyebrow">✦ PREDICT</span>
+      <h2 class="section-title">Get Your Instant Estimate</h2>
+      <p class="section-sub">Fill in the property details below for an AI-powered valuation</p>
+    </div>
+
+    <div class="content-grid">
+
+      <!-- ── FORM PANEL ── -->
+      <div class="form-panel">
+
+        <div class="demo-strip">
+          <span class="demo-label">Quick demo:</span>
+          <button type="button" class="demo-btn db-budget" onclick="fillDemo('budget')">🏠 Budget</button>
+          <button type="button" class="demo-btn db-mid"    onclick="fillDemo('midrange')">🏘 Mid-Range</button>
+          <button type="button" class="demo-btn db-luxury" onclick="fillDemo('luxury')">🏰 Luxury</button>
+        </div>
+
+        <div id="error-box" class="error-box hidden" role="alert">
+          <strong>⚠ Please fix the following:</strong>
+          <ul id="error-list"></ul>
+        </div>
+
+        <div id="predict-form">
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label for="numberOfBedrooms">
+                <span class="lbl-icon">🛏</span>Bedrooms
+              </label>
+              <input type="number" id="numberOfBedrooms" min="1" max="20" step="1"
+                     placeholder="e.g. 3" class="form-input" />
+              <span class="input-hint">Typically 1–10</span>
+            </div>
+
+            <div class="form-group">
+              <label for="numberOfBathrooms">
+                <span class="lbl-icon">🚿</span>Bathrooms
+              </label>
+              <input type="number" id="numberOfBathrooms" min="0.5" max="10" step="0.25"
+                     placeholder="e.g. 2.5" class="form-input" />
+              <span class="input-hint">Can be 1, 1.5, 2, 2.5…</span>
+            </div>
+
+            <div class="form-group">
+              <label for="livingArea">
+                <span class="lbl-icon">📐</span>Living Area (sq ft)
+              </label>
+              <input type="number" id="livingArea" min="200" max="15000" step="10"
+                     placeholder="e.g. 1800" class="form-input" />
+              <span class="input-hint">Indoor floor area</span>
+            </div>
+
+            <div class="form-group">
+              <label for="lotArea">
+                <span class="lbl-icon">🌿</span>Lot Area (sq ft)
+              </label>
+              <input type="number" id="lotArea" min="400" max="1100000" step="100"
+                     placeholder="e.g. 7500" class="form-input" />
+              <span class="input-hint">Total plot size</span>
+            </div>
+
+            <div class="form-group">
+              <label for="numberOfFloors">
+                <span class="lbl-icon">🏢</span>Number of Floors
+              </label>
+              <input type="number" id="numberOfFloors" min="1" max="4" step="0.5"
+                     placeholder="e.g. 2" class="form-input" />
+              <span class="input-hint">1, 1.5, 2, 2.5…</span>
+            </div>
+
+            <div class="form-group">
+              <label for="conditionOfTheHouse">
+                <span class="lbl-icon">⭐</span>House Condition (1–5)
+              </label>
+              <select id="conditionOfTheHouse" class="form-input">
+                <option value="" disabled selected>Select condition</option>
+                <option value="1">1 — Poor</option>
+                <option value="2">2 — Fair</option>
+                <option value="3">3 — Average</option>
+                <option value="4">4 — Good</option>
+                <option value="5">5 — Excellent</option>
+              </select>
+              <span class="input-hint">Overall property condition</span>
+            </div>
+
+            <div class="form-group">
+              <label for="BuiltYear">
+                <span class="lbl-icon">📅</span>Year Built
+              </label>
+              <input type="number" id="BuiltYear" min="1900" max="2024" step="1"
+                     placeholder="e.g. 1995" class="form-input" />
+              <span class="input-hint">Construction year</span>
+            </div>
+
+            <div class="form-group">
+              <label for="PostalCode">
+                <span class="lbl-icon">📮</span>Postal Code
+              </label>
+              <input type="number" id="PostalCode" min="100000" max="200000" step="1"
+                     placeholder="e.g. 122032" class="form-input" />
+              <span class="input-hint">6-digit PIN (122003–122072)</span>
+            </div>
+
+            <div class="form-group">
+              <label for="NumberOfSchoolsNearby">
+                <span class="lbl-icon">🏫</span>Schools Nearby
+              </label>
+              <input type="number" id="NumberOfSchoolsNearby" min="0" max="10" step="1"
+                     placeholder="e.g. 2" class="form-input" />
+              <span class="input-hint">Within 5 km radius</span>
+            </div>
+
+            <div class="form-group">
+              <label for="DistanceFromTheAirport">
+                <span class="lbl-icon">✈️</span>Distance from Airport (km)
+              </label>
+              <input type="number" id="DistanceFromTheAirport" min="1" max="200" step="1"
+                     placeholder="e.g. 60" class="form-input" />
+              <span class="input-hint">Nearest commercial airport</span>
+            </div>
+
+          </div><!-- /form-grid -->
+
+          <div class="form-actions">
+            <button id="predict-btn" type="button" onclick="submitPrediction()">
+              <span id="btn-text">✦ Predict Price</span>
+              <span id="btn-loader" class="btn-loader hidden"></span>
+            </button>
+            <button type="button" class="reset-btn" onclick="resetForm()">
+              <span>↺</span> Reset
+            </button>
+          </div>
+
+        </div><!-- /predict-form -->
+      </div><!-- /form-panel -->
+
+      <!-- ── RESULT PANEL ── -->
+      <div class="result-panel">
+
+        <div id="result-placeholder" class="result-placeholder">
+          <div class="rp-icon-wrap">
+            <div class="rp-icon">🏠</div>
+          </div>
+          <h3>Your Estimate Appears Here</h3>
+          <p>Fill in the property details and click <strong>Predict Price</strong> to get an AI-powered valuation.</p>
+          <div class="rp-features">
+            <span>✓ Instant results</span>
+            <span>✓ Confidence range</span>
+            <span>✓ Input summary</span>
+          </div>
+        </div>
+
+        <div id="result-card" class="result-card hidden">
+          <div class="result-header">
+            <div class="result-label-row">
+              <span class="result-chip">AI Estimate</span>
+              <span id="result-tier" class="result-tier">—</span>
+            </div>
+            <div id="result-price" class="result-price">₹0</div>
+            <p class="result-sub">Predicted Market Value</p>
+          </div>
+
+          <div class="confidence-section">
+            <div class="conf-label">
+              <span>80% Confidence Range</span>
+              <span class="conf-help">Based on forest tree spread</span>
+            </div>
+            <div class="conf-bar-track">
+              <div id="conf-bar" class="conf-bar"></div>
+              <div id="conf-marker" class="conf-marker"></div>
+            </div>
+            <div class="conf-values">
+              <span id="range-low" class="cv-low">₹—</span>
+              <span id="range-high" class="cv-high">₹—</span>
+            </div>
+          </div>
+
+          <div class="summary-section">
+            <div class="summary-title">Input Summary</div>
+            <div id="result-summary" class="summary-grid"></div>
+          </div>
+
+          <div class="result-actions">
+            <button onclick="window.print()" class="action-btn">
+              🖨 Print Report
+            </button>
+            <button onclick="copyResult()" class="action-btn" id="copy-btn">
+              📋 Copy Result
+            </button>
+          </div>
+        </div>
+
+        <!-- Feature importance chart -->
+        <div class="chart-panel">
+          <div class="chart-header">
+            <h3>What Drives the Price?</h3>
+            <p>Feature importance from trained Random Forest</p>
+          </div>
+          <canvas id="importanceChart" height="240"></canvas>
+        </div>
+
+      </div><!-- /result-panel -->
+    </div><!-- /content-grid -->
+  </main>
+
+  <!-- ═══ HOW IT WORKS ═══ -->
+  <section id="about-section" class="about-section">
+    <div class="about-inner">
+      <span class="section-eyebrow">✦ METHODOLOGY</span>
+      <h2 class="section-title">How It Works</h2>
+      <div class="about-grid">
+
+        <div class="about-card ac-blue">
+          <div class="ac-number">01</div>
+          <div class="ac-icon">📊</div>
+          <h3>Original MATLAB App</h3>
+          <p>
+            Built with MATLAB's <strong>Regression Learner</strong> toolbox and App Designer.
+            The original linear regression achieved an R² of ~59 % on the 14,619-record Indian housing dataset.
+          </p>
+        </div>
+
+        <div class="about-card ac-emerald">
+          <div class="ac-number">02</div>
+          <div class="ac-icon">🐍</div>
+          <h3>Python Conversion</h3>
+          <p>
+            Rebuilt using <strong>scikit-learn's RandomForestRegressor</strong> (300 trees).
+            The ensemble model captures non-linear interactions, lifting R² to <strong>~77 %</strong>.
+          </p>
+        </div>
+
+        <div class="about-card ac-amber">
+          <div class="ac-number">03</div>
+          <div class="ac-icon">🌐</div>
+          <h3>Web Deployment</h3>
+          <p>
+            Flask API serves predictions in milliseconds.
+            Packaged with <code>Procfile</code> for one-click <strong>Render.com</strong> deployment.
+            Model cached via joblib for fast cold starts.
+          </p>
+        </div>
+
+        <div class="about-card ac-rose">
+          <div class="ac-number">04</div>
+          <div class="ac-icon">🎯</div>
+          <h3>Confidence Intervals</h3>
+          <p>
+            Each of the 300 decision trees produces its own prediction.
+            The 10th–90th percentile spread forms an <strong>80% confidence band</strong>,
+            giving an honest estimate range rather than a single point.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ COMPARISON TABLE ═══ -->
+  <section class="comparison-section">
+    <div class="comparison-inner">
+      <span class="section-eyebrow">✦ COMPARISON</span>
+      <h2 class="section-title">MATLAB vs Python</h2>
+      <div class="comp-table-wrap">
+        <table class="comp-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th class="col-matlab">🔵 MATLAB Original</th>
+              <th class="col-python">🟢 Python Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>UI Framework</td><td>App Designer</td><td>HTML + CSS + JS (Flask)</td></tr>
+            <tr><td>Model Type</td><td>Linear Regression</td><td>Random Forest (300 trees)</td></tr>
+            <tr><td>Model Storage</td><td><code>.mat</code> struct</td><td><code>model.pkl</code> (joblib)</td></tr>
+            <tr><td>Accuracy (R²)</td><td class="val-bad">~59%</td><td class="val-good">~77%</td></tr>
+            <tr><td>Confidence Band</td><td class="val-bad">None</td><td class="val-good">80% interval</td></tr>
+            <tr><td>Deployment</td><td>Local MATLAB</td><td>Render.com / any cloud</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-logo">
+        <div class="logo-badge sm">PW</div>
+        <span>PriceWise India</span>
+      </div>
+      <p class="footer-sub">
+        Random Forest · Flask · Chart.js · scikit-learn<br/>
+        Dataset: 14,619 Indian housing transactions
+      </p>
+      <p class="footer-note">
+        Built as part of MATLAB → Python conversion project.
+        Predictions are estimates only — not professional valuations.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Pass server data to JS -->
+  <script>
+    window.DATASET_STATS = {{ stats | tojson }};
+    window.MODEL_METRICS = {{ metrics | tojson }};
+    window.FEAT_IMP = {{ feat_imp | tojson }};
+  </script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
