@@ -2,355 +2,307 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
 <title>PriceWise India — AI House Price Predictor</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+
+<link rel="stylesheet" href="style.css"/>
+
+<style>
+
+body{
+    margin:0;
+    font-family:'DM Sans',sans-serif;
+    background:#0f172a;
+    color:white;
+}
+
+header{
+    padding:20px;
+    background:#111827;
+}
+
+.logo{
+    font-size:28px;
+    font-weight:700;
+}
+
+.hero{
+    padding:60px 20px;
+    text-align:center;
+}
+
+.hero-title{
+    font-size:50px;
+    margin-bottom:20px;
+}
+
+.grad{
+    color:#38bdf8;
+}
+
+.hero-sub{
+    font-size:18px;
+    color:#cbd5e1;
+}
+
+.stats-strip{
+    padding:30px;
+    background:#111827;
+}
+
+.stats-inner{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:20px;
+}
+
+.stat-item{
+    background:#1e293b;
+    padding:20px;
+    border-radius:12px;
+    text-align:center;
+}
+
+.stat-val{
+    font-size:28px;
+    font-weight:700;
+}
+
+.main-section{
+    padding:40px 20px;
+}
+
+.panel{
+    background:#1e293b;
+    border-radius:16px;
+    padding:25px;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+}
+
+.form-input{
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    margin-top:8px;
+}
+
+.predict-btn{
+    margin-top:25px;
+    width:100%;
+    padding:15px;
+    background:#38bdf8;
+    color:black;
+    font-size:18px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:700;
+}
+
+.result-box{
+    margin-top:30px;
+    padding:20px;
+    border-radius:12px;
+    background:#0f172a;
+    text-align:center;
+}
+
+.result-price{
+    font-size:40px;
+    color:#22c55e;
+    font-weight:700;
+}
+
+footer{
+    padding:30px;
+    text-align:center;
+    background:#111827;
+    margin-top:40px;
+}
+
+</style>
+
 </head>
+
 <body>
 
-<div class="bg-canvas" aria-hidden="true">
-  <div class="orb orb1"></div>
-  <div class="orb orb2"></div>
-  <div class="orb orb3"></div>
-</div>
-
 <header>
-  <div class="header-inner">
-    <a class="logo" href="#">
-      <div class="logo-icon">🏡</div>
-      <span class="logo-text">PriceWise <span>India</span></span>
-    </a>
-    <nav>
-      <a class="nav-link active" href="#predict-section">Predict</a>
-      <a class="nav-link" href="#stats-section">Dataset</a>
-      <a class="nav-link" href="#about-section">About</a>
-    </nav>
-    <div class="header-actions">
-      <button class="theme-btn" id="theme-btn" title="Toggle theme" aria-label="Toggle dark/light mode">
-        <i class="ti ti-sun" id="theme-icon"></i>
-      </button>
-      <button class="chat-toggle-btn" id="chat-toggle-btn" onclick="toggleChat()" title="AI Assistant" aria-label="Open AI chat assistant">
-        <i class="ti ti-message-chatbot"></i>
-        <span class="chat-badge" aria-hidden="true"></span>
-      </button>
-    </div>
-  </div>
+    <div class="logo">🏡 PriceWise India</div>
 </header>
 
-<!-- HERO -->
 <section class="hero">
-  <div class="hero-content">
-    <p class="hero-eyebrow">AI-Powered Real Estate Intelligence</p>
-    <h1 class="hero-title">Predict House Prices<br><span class="grad">Across India</span></h1>
+
+    <h1 class="hero-title">
+        Predict House Prices
+        <br>
+        <span class="grad">Across India</span>
+    </h1>
+
     <p class="hero-sub">
-      Our Random Forest model, trained on
-      <strong>{{ "{:,}".format(stats.total_records | default(14619)) }}</strong>
-      real Indian housing transactions, delivers instant price estimates with confidence ranges.
+        AI-powered real estate prediction system trained on Indian housing data.
     </p>
-    <div class="hero-cta">
-      <a href="#predict-section" class="btn-primary">
-        <i class="ti ti-sparkles" aria-hidden="true"></i> Get an Estimate
-      </a>
-      <button class="btn-outline" onclick="toggleChat()">
-        <i class="ti ti-message-chatbot" aria-hidden="true"></i> Ask AI Assistant
-      </button>
-    </div>
-  </div>
-  <div class="hero-visual" aria-hidden="true">
-    <div class="price-float pf-budget">
-      <div class="pf-label">Budget Home</div>
-      <div class="pf-val">₹18.5 L</div>
-      <div class="pf-tier">Budget Segment</div>
-    </div>
-    <div class="price-float pf-mid">
-      <div class="pf-label">Mid-Range</div>
-      <div class="pf-val">₹45.2 L</div>
-      <div class="pf-tier">Premium Segment</div>
-    </div>
-    <div class="price-float pf-lux">
-      <div class="pf-label">Luxury Villa</div>
-      <div class="pf-val">₹1.8 Cr</div>
-      <div class="pf-tier">Luxury Segment</div>
-    </div>
-    <div class="hero-badge">
-      <div class="pct">{{ metrics.r2 | default('77') }}%</div>
-      <div>R² Score</div>
-    </div>
-  </div>
+
 </section>
 
-<!-- STATS STRIP -->
-<section id="stats-section" class="stats-strip">
-  <div class="stats-inner">
-    <div class="stat-item">
-      <div class="stat-val">{{ "{:,}".format(stats.total_records | default(14619)) }}</div>
-      <div class="stat-lbl">Training Records</div>
-      <div class="stat-delta">↑ Real transactions</div>
+<section class="stats-strip">
+
+    <div class="stats-inner">
+
+        <div class="stat-item">
+            <div class="stat-val">14,619</div>
+            <div>Training Records</div>
+        </div>
+
+        <div class="stat-item">
+            <div class="stat-val">₹538,806</div>
+            <div>Average Price</div>
+        </div>
+
+        <div class="stat-item">
+            <div class="stat-val">₹78,000</div>
+            <div>Minimum Price</div>
+        </div>
+
+        <div class="stat-item">
+            <div class="stat-val">₹77,00,000</div>
+            <div>Maximum Price</div>
+        </div>
+
+        <div class="stat-item">
+            <div class="stat-val">77%</div>
+            <div>Model Accuracy</div>
+        </div>
+
     </div>
-    <div class="stat-item">
-      <div class="stat-val">₹{{ "{:,}".format(stats.avg_price | default(538806)) }}</div>
-      <div class="stat-lbl">Avg House Price</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-val">₹{{ "{:,}".format(stats.min_price | default(78000)) }}</div>
-      <div class="stat-lbl">Lowest Price</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-val">₹{{ "{:,}".format(stats.max_price | default(7700000)) }}</div>
-      <div class="stat-lbl">Highest Price</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-val">{{ metrics.r2 | default('77.1') }}%</div>
-      <div class="stat-lbl">Model R² Accuracy</div>
-      <div class="stat-delta">↑ vs 59% MATLAB LR</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-val">10</div>
-      <div class="stat-lbl">Features Used</div>
-    </div>
-  </div>
+
 </section>
 
-<!-- MAIN PREDICT -->
-<main id="predict-section" class="main-section">
-  <div class="predict-grid">
+<main class="main-section">
 
-    <!-- FORM PANEL -->
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-icon"><i class="ti ti-home-search" aria-hidden="true"></i></div>
-        <div>
-          <h2>Property Details</h2>
-          <p>Fill in details for an instant AI-powered price estimate</p>
-        </div>
-      </div>
-      <div class="panel-body">
-        <div class="demo-strip">
-          <span class="demo-lbl">Quick Fill:</span>
-          <button type="button" class="demo-pill" onclick="fillDemo('budget',this)">Budget Home</button>
-          <button type="button" class="demo-pill" onclick="fillDemo('midrange',this)">Mid-Range</button>
-          <button type="button" class="demo-pill" onclick="fillDemo('luxury',this)">Luxury</button>
-        </div>
-        <div id="error-box" class="error-box hidden" role="alert" aria-live="polite">
-          <strong><i class="ti ti-alert-circle" aria-hidden="true"></i> Please fix the following:</strong>
-          <ul id="error-list"></ul>
-        </div>
-        <div class="form-grid" id="predict-form">
-          <div class="form-group">
-            <label for="numberOfBedrooms"><i class="ti ti-bed" aria-hidden="true"></i> Bedrooms</label>
-            <input type="number" id="numberOfBedrooms" class="form-input" min="1" max="20" step="1" placeholder="e.g. 3" autocomplete="off"/>
-            <span class="input-hint">Typically 1–10</span>
-          </div>
-          <div class="form-group">
-            <label for="numberOfBathrooms"><i class="ti ti-bath" aria-hidden="true"></i> Bathrooms</label>
-            <input type="number" id="numberOfBathrooms" class="form-input" min="0.5" max="10" step="0.25" placeholder="e.g. 2.5" autocomplete="off"/>
-            <span class="input-hint">1, 1.5, 2, 2.5…</span>
-          </div>
-          <div class="form-group">
-            <label for="livingArea"><i class="ti ti-ruler" aria-hidden="true"></i> Living Area (sq ft)</label>
-            <input type="number" id="livingArea" class="form-input" min="200" max="15000" step="10" placeholder="e.g. 1800" autocomplete="off"/>
-            <span class="input-hint">Indoor floor area</span>
-          </div>
-          <div class="form-group">
-            <label for="lotArea"><i class="ti ti-plant" aria-hidden="true"></i> Lot Area (sq ft)</label>
-            <input type="number" id="lotArea" class="form-input" min="400" max="1100000" step="100" placeholder="e.g. 7500" autocomplete="off"/>
-            <span class="input-hint">Total plot size</span>
-          </div>
-          <div class="form-group">
-            <label for="numberOfFloors"><i class="ti ti-building" aria-hidden="true"></i> Number of Floors</label>
-            <input type="number" id="numberOfFloors" class="form-input" min="1" max="4" step="0.5" placeholder="e.g. 2" autocomplete="off"/>
-            <span class="input-hint">1, 1.5, 2, 2.5…</span>
-          </div>
-          <div class="form-group">
-            <label for="conditionOfTheHouse"><i class="ti ti-star" aria-hidden="true"></i> House Condition</label>
-            <select id="conditionOfTheHouse" class="form-input">
-              <option value="" disabled selected>Select condition</option>
-              <option value="1">1 — Poor</option>
-              <option value="2">2 — Fair</option>
-              <option value="3">3 — Average</option>
-              <option value="4">4 — Good</option>
-              <option value="5">5 — Excellent</option>
-            </select>
-            <span class="input-hint">Overall condition</span>
-          </div>
-          <div class="form-group">
-            <label for="BuiltYear"><i class="ti ti-calendar" aria-hidden="true"></i> Year Built</label>
-            <input type="number" id="BuiltYear" class="form-input" min="1900" max="2024" step="1" placeholder="e.g. 1995" autocomplete="off"/>
-            <span class="input-hint">Construction year</span>
-          </div>
-          <div class="form-group">
-            <label for="PostalCode"><i class="ti ti-mailbox" aria-hidden="true"></i> Postal Code</label>
-            <input type="number" id="PostalCode" class="form-input" min="100000" max="200000" step="1" placeholder="e.g. 122032" autocomplete="off"/>
-            <span class="input-hint">6-digit PIN code</span>
-          </div>
-          <div class="form-group">
-            <label for="NumberOfSchoolsNearby"><i class="ti ti-school" aria-hidden="true"></i> Schools Nearby</label>
-            <input type="number" id="NumberOfSchoolsNearby" class="form-input" min="0" max="10" step="1" placeholder="e.g. 2" autocomplete="off"/>
-            <span class="input-hint">Within 5 km radius</span>
-          </div>
-          <div class="form-group">
-            <label for="DistanceFromTheAirport"><i class="ti ti-plane" aria-hidden="true"></i> Airport Distance (km)</label>
-            <input type="number" id="DistanceFromTheAirport" class="form-input" min="1" max="200" step="1" placeholder="e.g. 60" autocomplete="off"/>
-            <span class="input-hint">Nearest airport</span>
-          </div>
-        </div>
-        <div class="form-actions">
-          <button class="predict-btn" id="predict-btn" type="button" onclick="submitPrediction()">
-            <span id="btn-text"><i class="ti ti-sparkles" aria-hidden="true"></i> Predict Price</span>
-            <span id="btn-loader" class="spinner hidden" aria-label="Loading"></span>
-          </button>
-          <button class="reset-btn" type="button" onclick="resetForm()" aria-label="Reset form">
-            <i class="ti ti-refresh" aria-hidden="true"></i>
-          </button>
-        </div>
-      </div>
-    </div>
+<div class="panel">
 
-    <!-- RESULT COLUMN -->
-    <div class="result-col">
-      <div class="panel">
-        <div class="panel-head">
-          <div class="panel-icon" style="background:rgba(16,185,129,.15);color:#10b981">
-            <i class="ti ti-chart-bar" aria-hidden="true"></i>
-          </div>
-          <div>
-            <h2>Price Estimate</h2>
-            <p>AI-generated market valuation</p>
-          </div>
-        </div>
-        <div id="result-placeholder" class="result-placeholder">
-          <div class="placeholder-ring" aria-hidden="true"><i class="ti ti-home"></i></div>
-          <h3>Your estimate will appear here</h3>
-          <p>Fill in property details and click Predict Price</p>
-        </div>
-        <div id="result-card" class="hidden">
-          <div class="result-top">
-            <div class="result-label">Estimated Market Value</div>
-            <div id="result-price" class="result-price" aria-live="polite">₹0</div>
-            <span id="result-tier" class="result-tier">—</span>
-          </div>
-          <div class="conf-section">
-            <div class="conf-label">80% Confidence Range</div>
-            <div class="conf-track" role="presentation">
-              <div class="conf-fill" id="conf-fill" style="width:60%"></div>
-              <div class="conf-marker" id="conf-marker" style="left:50%"></div>
-            </div>
-            <div class="conf-labels">
-              <span id="range-low">₹—</span>
-              <span id="range-high">₹—</span>
-            </div>
-          </div>
-          <div class="summary-grid" id="result-summary"></div>
-          <div class="result-actions-row">
-            <button class="act-btn" type="button" onclick="copyResult()">
-              <i class="ti ti-copy" aria-hidden="true"></i> <span id="copy-lbl">Copy</span>
-            </button>
-            <button class="act-btn" type="button" onclick="window.print()">
-              <i class="ti ti-printer" aria-hidden="true"></i> Print
-            </button>
-            <button class="act-btn" type="button" onclick="askAboutResult()">
-              <i class="ti ti-message-chatbot" aria-hidden="true"></i> Ask AI
-            </button>
-          </div>
-        </div>
-      </div>
+<h2>Property Details</h2>
 
-      <div class="panel" style="margin-top:24px">
-        <div class="panel-head">
-          <div class="panel-icon" style="background:rgba(139,92,246,.15);color:#8b5cf6">
-            <i class="ti ti-chart-dots" aria-hidden="true"></i>
-          </div>
-          <div>
-            <h2>What Drives the Price?</h2>
-            <p>Feature importance from the trained model</p>
-          </div>
-        </div>
-        <div class="panel-body" style="padding-top:16px">
-          <canvas id="importanceChart" height="220" aria-label="Feature importance bar chart"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-</main>
+<div class="form-grid">
 
-<!-- ABOUT -->
-<section id="about-section" class="about-section">
-  <div class="about-inner">
-    <h2>How It Works</h2>
-    <div class="about-grid">
-      <div class="about-card">
-        <div class="about-card-icon"><i class="ti ti-chart-scatter" aria-hidden="true"></i></div>
-        <h3>Original MATLAB App</h3>
-        <p>The original project used MATLAB's Regression Learner to train a Linear Regression model with 10 input fields and a Predict button.</p>
-      </div>
-      <div class="about-card">
-        <div class="about-card-icon"><i class="ti ti-brand-python" aria-hidden="true"></i></div>
-        <h3>Python Upgrade</h3>
-        <p>Re-implemented with scikit-learn's RandomForestRegressor (R² ≈ 77% vs ~59%), Flask backend, Pandas and NumPy data handling.</p>
-      </div>
-      <div class="about-card">
-        <div class="about-card-icon"><i class="ti ti-cloud-upload" aria-hidden="true"></i></div>
-        <h3>Deploy Ready</h3>
-        <p>Packaged for Render.com with Procfile and requirements.txt. Model caches after first run for near-instant subsequent loads.</p>
-      </div>
-      <div class="about-card">
-        <div class="about-card-icon"><i class="ti ti-robot" aria-hidden="true"></i></div>
-        <h3>AI Chat Assistant</h3>
-        <p>An integrated AI assistant helps you understand estimates, compare properties, and get real estate insights in real time.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <p>Built with Flask · scikit-learn · Chart.js · Claude AI &nbsp;|&nbsp; Dataset: 14,619 Indian housing transactions</p>
-</footer>
-
-<!-- CHATBOT -->
-<div class="chat-overlay" id="chat-overlay" role="complementary" aria-label="AI Chat Assistant">
-  <div class="chat-window hidden" id="chat-window" aria-modal="true" role="dialog" aria-label="PriceWise AI Chat">
-    <div class="chat-header">
-      <div class="chat-avatar" aria-hidden="true">🤖</div>
-      <div class="chat-header-text">
-        <div class="name">PriceWise AI</div>
-        <div class="status"><span class="online-dot" aria-hidden="true"></span> Online · Real Estate Expert</div>
-      </div>
-      <button class="chat-close" onclick="toggleChat()" aria-label="Close chat">
-        <i class="ti ti-x"></i>
-      </button>
-    </div>
-    <div class="chat-messages" id="chat-messages" aria-live="polite" aria-label="Chat messages"></div>
-    <div class="chat-suggestions" id="chat-suggestions">
-      <button class="sug-chip" type="button" onclick="sendSuggestion('What factors most affect house prices in India?')">Price factors</button>
-      <button class="sug-chip" type="button" onclick="sendSuggestion('How accurate is the Random Forest model?')">Model accuracy</button>
-      <button class="sug-chip" type="button" onclick="sendSuggestion('What is a good house condition score?')">Condition guide</button>
-      <button class="sug-chip" type="button" onclick="sendSuggestion('How do I improve my property value?')">Improve value</button>
-    </div>
-    <div class="chat-input-row">
-      <textarea class="chat-input" id="chat-input" rows="1"
-        placeholder="Ask about real estate, pricing, the model…"
-        onkeydown="handleChatKey(event)"
-        oninput="autoResizeTA(this)"
-        aria-label="Type your message"></textarea>
-      <button class="chat-send" id="chat-send" type="button" onclick="sendChat()" aria-label="Send message">
-        <i class="ti ti-send"></i>
-      </button>
-    </div>
-  </div>
-  <button class="chat-fab" id="chat-fab" type="button" onclick="toggleChat()" aria-label="Open AI chat">
-    <i class="ti ti-message-chatbot"></i>
-  </button>
+<div class="form-group">
+<label>Bedrooms</label>
+<input type="number" id="bedrooms" class="form-input" placeholder="e.g. 3"/>
 </div>
 
+<div class="form-group">
+<label>Bathrooms</label>
+<input type="number" id="bathrooms" class="form-input" placeholder="e.g. 2"/>
+</div>
+
+<div class="form-group">
+<label>Living Area (sq ft)</label>
+<input type="number" id="livingArea" class="form-input" placeholder="e.g. 1800"/>
+</div>
+
+<div class="form-group">
+<label>Lot Area (sq ft)</label>
+<input type="number" id="lotArea" class="form-input" placeholder="e.g. 7500"/>
+</div>
+
+<div class="form-group">
+<label>Floors</label>
+<input type="number" id="floors" class="form-input" placeholder="e.g. 2"/>
+</div>
+
+<div class="form-group">
+<label>Condition</label>
+
+<select id="condition" class="form-input">
+<option>1 - Poor</option>
+<option>2 - Fair</option>
+<option selected>3 - Average</option>
+<option>4 - Good</option>
+<option>5 - Excellent</option>
+</select>
+
+</div>
+
+</div>
+
+<button class="predict-btn" onclick="predictPrice()">
+Predict Price
+</button>
+
+<div class="result-box">
+
+<h3>Estimated Price</h3>
+
+<div class="result-price" id="result">
+₹0
+</div>
+
+</div>
+
+</div>
+
+</main>
+
+<footer>
+Built with HTML • CSS • JavaScript • Chart.js
+</footer>
+
 <script>
-  window.FEAT_IMP = {{ feat_imp | tojson }};
-  window.DATASET_STATS = {{ stats | tojson }};
-  window.MODEL_METRICS = {{ metrics | tojson }};
+
+function predictPrice(){
+
+    let bedrooms =
+    parseFloat(document.getElementById("bedrooms").value) || 0;
+
+    let bathrooms =
+    parseFloat(document.getElementById("bathrooms").value) || 0;
+
+    let livingArea =
+    parseFloat(document.getElementById("livingArea").value) || 0;
+
+    let lotArea =
+    parseFloat(document.getElementById("lotArea").value) || 0;
+
+    let floors =
+    parseFloat(document.getElementById("floors").value) || 0;
+
+    let condition =
+    parseFloat(document.getElementById("condition").value) || 3;
+
+    let price =
+        (bedrooms * 500000) +
+        (bathrooms * 300000) +
+        (livingArea * 1200) +
+        (lotArea * 20) +
+        (floors * 200000) +
+        (condition * 100000);
+
+    price = Math.round(price);
+
+    document.getElementById("result").innerHTML =
+        "₹" + price.toLocaleString("en-IN");
+}
+
 </script>
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+
 </body>
 </html>
