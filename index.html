@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PriceWise India | House Price Predictor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">
+      <span class="brand-mark">PW</span>
+      <span>PriceWise <strong>India</strong></span>
+    </a>
+    <nav aria-label="Primary navigation">
+      <a href="#predict">Predict</a>
+      <a href="#dataset">Dataset</a>
+      <a href="#model">Model</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="intro-grid" aria-labelledby="page-title">
+      <div class="intro-copy">
+        <p class="eyebrow">AI real estate valuation</p>
+        <h1 id="page-title">Professional house price estimates for India.</h1>
+        <p>
+          Estimate market value using a Random Forest model trained on
+          {{ "{:,}".format(stats.total_records) }} housing records with location,
+          area, condition, schools, and airport-distance signals.
+        </p>
+        <div class="intro-actions">
+          <a class="primary-link" href="#predict">Run valuation</a>
+          <a class="secondary-link" href="#model">View model signals</a>
+        </div>
+      </div>
+
+      <aside class="market-card" aria-label="Model summary">
+        <div class="market-card-top">
+          <span>Average transaction value</span>
+          <strong>Rs {{ "{:,}".format(stats.avg_price) }}</strong>
+        </div>
+        <div class="model-score">
+          <span>Model R2 score</span>
+          <strong>{{ metrics.r2 }}%</strong>
+        </div>
+        <div class="card-divider"></div>
+        <dl class="mini-metrics">
+          <div>
+            <dt>Lowest</dt>
+            <dd>Rs {{ "{:,}".format(stats.min_price) }}</dd>
+          </div>
+          <div>
+            <dt>Highest</dt>
+            <dd>Rs {{ "{:,}".format(stats.max_price) }}</dd>
+          </div>
+        </dl>
+      </aside>
+    </section>
+
+    <section id="dataset" class="stats-grid" aria-label="Dataset statistics">
+      <article>
+        <span>Training records</span>
+        <strong>{{ "{:,}".format(stats.total_records) }}</strong>
+      </article>
+      <article>
+        <span>Features used</span>
+        <strong>10</strong>
+      </article>
+      <article>
+        <span>Model type</span>
+        <strong>Random Forest</strong>
+      </article>
+      <article>
+        <span>Deployment</span>
+        <strong>Flask + Render</strong>
+      </article>
+    </section>
+
+    <section id="predict" class="workspace" aria-label="Prediction workspace">
+      <form id="predict-form" class="panel form-panel">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Property inputs</p>
+            <h2>Run a valuation</h2>
+          </div>
+          <span class="status-pill">Ready</span>
+        </div>
+
+        <div id="error-box" class="error-box hidden" role="alert"></div>
+
+        <div class="quick-row" aria-label="Quick fill examples">
+          <button type="button" data-demo="budget">Budget sample</button>
+          <button type="button" data-demo="mid">Mid-range sample</button>
+          <button type="button" data-demo="luxury">Luxury sample</button>
+        </div>
+
+        <div class="form-grid">
+          <label>Bedrooms<input name="number of bedrooms" type="number" min="1" max="20" step="1" placeholder="3" required></label>
+          <label>Bathrooms<input name="number of bathrooms" type="number" min="0.5" max="10" step="0.25" placeholder="2" required></label>
+          <label>Living area (sq ft)<input name="living area" type="number" min="200" max="15000" step="10" placeholder="1800" required></label>
+          <label>Lot area (sq ft)<input name="lot area" type="number" min="400" max="1100000" step="100" placeholder="5000" required></label>
+          <label>Floors<input name="number of floors" type="number" min="1" max="4" step="0.5" placeholder="2" required></label>
+          <label>Condition
+            <select name="condition of the house" required>
+              <option value="">Select condition</option>
+              <option value="1">1 - Poor</option>
+              <option value="2">2 - Fair</option>
+              <option value="3">3 - Average</option>
+              <option value="4">4 - Good</option>
+              <option value="5">5 - Excellent</option>
+            </select>
+          </label>
+          <label>Built year<input name="Built Year" type="number" min="1900" max="2026" step="1" placeholder="2010" required></label>
+          <label>Postal code<input name="Postal Code" type="number" min="100000" max="999999" step="1" placeholder="122006" required></label>
+          <label>Schools nearby<input name="Number of schools nearby" type="number" min="0" max="10" step="1" placeholder="2" required></label>
+          <label>Airport distance (km)<input name="Distance from the airport" type="number" min="1" max="200" step="1" placeholder="45" required></label>
+        </div>
+
+        <button class="submit-btn" type="submit">Predict price</button>
+      </form>
+
+      <aside class="panel result-panel">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Estimated value</p>
+            <h2 id="result-price">0</h2>
+          </div>
+          <span class="status-pill muted-pill">Live</span>
+        </div>
+        <p id="result-text" class="muted">Predicted price output will appear here as a number in INR.</p>
+        <div id="range-card" class="range-card hidden">
+          <span id="result-tier"></span>
+          <strong id="result-range"></strong>
+        </div>
+        <div class="result-note">
+          <span>Confidence range</span>
+          <p>Shown as an indicative 15% band around the predicted value.</p>
+        </div>
+     
