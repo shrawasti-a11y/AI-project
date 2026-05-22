@@ -30,14 +30,7 @@ app = Flask(__name__)
 
 
 def load_data():
-    if not DATA_FILE.exists():
-        raise FileNotFoundError(f"Dataset not found: {DATA_FILE.name}")
-
     data = pd.read_csv(DATA_FILE)
-    missing = [column for column in FEATURES + [TARGET] if column not in data.columns]
-    if missing:
-        raise ValueError(f"Dataset is missing columns: {', '.join(missing)}")
-
     return data.dropna(subset=FEATURES + [TARGET])
 
 
@@ -61,12 +54,7 @@ def train_or_load_model():
     x_train, x_test, y_train, y_test = train_test_split(
         x, y, test_size=0.2, random_state=42
     )
-    score_model = RandomForestRegressor(
-        n_estimators=180,
-        random_state=42,
-        min_samples_leaf=2,
-        n_jobs=-1,
-    )
+    score_model = RandomForestRegressor(n_estimators=180, random_state=42, min_samples_leaf=2, n_jobs=-1)
     score_model.fit(x_train, y_train)
     r2 = r2_score(y_test, score_model.predict(x_test))
 
@@ -85,9 +73,8 @@ def train_or_load_model():
         "min_price": int(data[TARGET].min()),
         "max_price": int(data[TARGET].max()),
     }
-    metrics = {"r2": round(r2 * 100, 1)}
 
-    return model, stats, metrics, importances
+    return model, stats, {"r2": round(r2 * 100, 1)}, importances
 
 
 model, dataset_stats, model_metrics, feature_importance = train_or_load_model()
@@ -108,43 +95,18 @@ def predict():
     payload = request.get_json(silent=True) or {}
 
     values = {}
-    errors = []
     for feature in FEATURES:
-        try:
-            values[feature] = float(payload[feature])
-        except (KeyError, TypeError, ValueError):
-            errors.append(f"{feature} is required and must be a number.")
-
-    if errors:
-        return jsonify({"success": False, "errors": errors}), 400
+        values[feature] = float(payload[feature])
 
     row = pd.DataFrame([values], columns=FEATURES)
     price = max(0, float(model.predict(row)[0]))
-    low = price * 0.85
-    high = price * 1.15
 
-    if price < 2_500_000:
-        tier = "Budget"
-    elif price < 7_500_000:
-        tier = "Mid-range"
-    else:
-        tier = "Luxury"
-
-    return jsonify(
-        {
-            "success": True,
-            "price": round(price),
-            "range_low": round(low),
-            "range_high": round(high),
-            "tier": tier,
-            "inputs": values,
-        }
-    )
-
-
-@app.route("/health")
-def health():
-    return jsonify({"status": "ok"})
+    return jsonify({
+        "success": True,
+        "price": round(price),
+        "range_low": round(price * 0.85),
+        "range_high": round(price * 1.15),
+    })
 
 
 if __name__ == "__main__":
