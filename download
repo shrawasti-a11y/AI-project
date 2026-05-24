@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+model.pkl
+models/model.pkl
+logs/
+prediction_history.jsonl
+.env
+.DS_Store
+*.zip
