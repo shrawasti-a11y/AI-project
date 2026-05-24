@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PriceWise India — Enterprise AI-powered real estate valuation platform for Indian properties.">
+  <title>PriceWise India | AI Real Estate Intelligence</title>
+
+  <!-- Fonts: Orbitron display + Outfit body -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- External libraries -->
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js" defer></script>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+
+  <!-- App styles — served by Flask -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       AMBIENT BACKGROUND LAYERS
+  ═══════════════════════════════════════════ -->
+  <div class="ambient" aria-hidden="true">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+    <div class="grid-overlay"></div>
+  </div>
+  <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
+
+  <!-- ═══════════════════════════════════════════
+       NAV
+  ═══════════════════════════════════════════ -->
+  <header class="navbar" id="navbar">
+    <a class="logo" href="#home">
+      <span class="logo-icon">⬡</span>
+      PriceWise<strong>India</strong>
+    </a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="#predict">Predict</a>
+      <a href="#model">Intelligence</a>
+      <a href="#stack">Stack</a>
+    </nav>
+    <div class="nav-actions">
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle theme" title="Toggle light/dark mode">
+        <i data-lucide="sun-moon"></i>
+      </button>
+      <a href="#predict" class="cta-nav-btn">Launch App →</a>
+    </div>
+    <button class="hamburger" id="hamburger" type="button" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <!-- ═══════════════════════════════════════════
+       HERO
+  ═══════════════════════════════════════════ -->
+  <section id="home" class="hero">
+    <div class="hero-body" data-aos="fade-up" data-aos-duration="900">
+      <div class="badge-chip">
+        <span class="dot"></span>
+        AI-Powered · Random Forest · Flask API
+      </div>
+      <h1 class="hero-title">
+        Enterprise<br>
+        <span class="gradient-text">Real Estate Intelligence</span><br>
+        for India.
+      </h1>
+      <p class="hero-sub">
+        Predict house prices with a production-grade ML pipeline — confidence scores, market insights, 
+        price bands, and investment ratings in under 50ms.
+      </p>
+      <div class="hero-btns">
+        <a href="#predict" class="btn btn-primary">
+          <i data-lucide="zap"></i> Predict a Property
+        </a>
+        <a href="#model" class="btn btn-ghost">
+          <i data-lucide="bar-chart-2"></i> View Intelligence
+        </a>
+      </div>
+
+      <!-- Trust badges -->
+      <div class="trust-strip">
+        <span><i data-lucide="shield-check"></i> Enterprise Validation</span>
+        <span><i data-lucide="timer"></i> &lt;50ms Responses</span>
+        <span><i data-lucide="database"></i> Prediction Logging</span>
+        <span><i data-lucide="trending-up"></i> Live Market Signals</span>
+      </div>
+    </div>
+
+    <!-- Hero visual panel -->
+    <div class="hero-visual" data-aos="fade-left" data-aos-delay="200" data-aos-duration="900">
+      <div class="viz-card glass">
+        <div class="viz-header">
+          <span class="viz-title">AI Valuation Engine</span>
+          <span class="status-live"><span class="dot"></span>Live</span>
+        </div>
+        <div class="orbit-container" aria-hidden="true">
+          <div class="orbit-core">⬡</div>
+          <div class="orbit-ring orbit-r1"></div>
+          <div class="orbit-ring orbit-r2"></div>
+          <div class="orbit-ring orbit-r3"></div>
+          <div class="orbit-dot od-1"></div>
+          <div class="orbit-dot od-2"></div>
+          <div class="orbit-dot od-3"></div>
+        </div>
+        <div class="viz-stats">
+          <div class="viz-stat">
+            <span>Avg. Market Value</span>
+            <strong>₹{{ "{:,}".format(stats.avg_price) }}</strong>
+          </div>
+          <div class="viz-stat">
+            <span>Model Accuracy</span>
+            <strong class="accent">{{ metrics.r2 }}%</strong>
+          </div>
+          <div class="viz-stat">
+            <span>Features</span>
+            <strong>{{ model_meta.feature_count }} signals</strong>
+          </div>
+        </div>
+        <div class="signal-bars" aria-hidden="true">
+          <span style="height:30%"></span>
+          <span style="height:55%"></span>
+          <span style="height:75%"></span>
+          <span style="height:45%"></span>
+          <span style="height:90%"></span>
+          <span style="height:60%"></span>
+          <span style="height:38%"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       STATS STRIP
+  ═══════════════════════════════════════════ -->
+  <section class="stats-belt" aria-label="Platform statistics">
+    <div class="stat-tile" data-aos="fade-up">
+      <i data-lucide="database"></i>
+      <div>
+        <strong data-counter data-target="{{ stats.total_records }}">0</strong>
+        <span>Training records</span>
+      </div>
+    </div>
+    <div class="stat-tile" data-aos="fade-up" data-aos-delay="80">
+      <i data-lucide="cpu"></i>
+      <div>
+        <strong data-counter data-target="{{ model_meta.feature_count }}">0</strong>
+        <span>Model features</span>
+      </div>
+    </div>
+    <div class="stat-tile" data-aos="fade-up" data-aos-delay="160">
+      <i data-lucide="activity"></i>
+      <div>
+        <strong>{{ metrics.r2 }}%</strong>
+        <span>R² accuracy</span>
+      </div>
+    </div>
+    <div class="stat-tile" data-aos="fade-up" data-aos-delay="240">
+      <i data-lucide="server"></i>
+      <div>
+        <strong>v{{ model_meta.model_version }}</strong>
+        <span>Model version</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       FEATURES GRID
+  ═══════════════════════════════════════════ -->
+  <section id="features" class="features-section">
+    <div class="section-head center" data-aos="fade-up">
+      <span class="eyebrow">Platform Capabilities</span>
+      <h2>Built like a real AI product,<br>not a student project.</h2>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card" data-aos="fade-up">
+        <div class="feat-icon"><i data-lucide="scan-line"></i></div>
+        <h3>Smart Validation</h3>
+        <p>Catches negative values, missing fields, invalid postal codes, and unrealistic property combinations before they reach the model.</p>
+      </div>
+      <div class="feat-card" data-aos="fade-up" data-aos-delay="80">
+        <div class="feat-icon"><i data-lucide="sparkles"></i></div>
+        <h3>AI Market Insights</h3>
+        <p>Every prediction includes market trend, investment rating, confidence score, and a recommended action — all generated automatically.</p>
+      </div>
+      <div class="feat-card" data-aos="fade-up" data-aos-delay="160">
+        <div class="feat-icon"><i data-lucide="layers"></i></div>
+        <h3>Modular Architecture</h3>
+        <p>Flask Blueprints, service layer, config classes, utility modules, rotating file logs, and health monitoring endpoint.</p>
+      </div>
+      <div class="feat-card" data-aos="fade-up" data-aos-delay="240">
+        <div class="feat-icon"><i data-lucide="cloud"></i></div>
+        <h3>Render Ready</h3>
+        <p>Deploys instantly with <code>gunicorn app:app</code>. Prediction logs, model weights, and structured JSON API responses included.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       HOW IT WORKS
+  ═══════════════════════════════════════════ -->
+  <section class="how-section">
+    <div class="section-head center" data-aos="fade-up">
+      <span class="eyebrow">Process</span>
+      <h2>How it works</h2>
+    </div>
+    <div class="how-steps">
+      <div class="step" data-aos="fade-up">
+        <div class="step-num">01</div>
+        <h3>Enter property details</h3>
+        <p>Fill in 10 validated fields — bedrooms, area, condition, location signals, and more.</p>
+      </div>
+      <div class="step-arrow" aria-hidden="true">→</div>
+      <div class="step" data-aos="fade-up" data-aos-delay="100">
+        <div class="step-num">02</div>
+        <h3>Random Forest scores it</h3>
+        <p>220-tree ensemble model processes every signal and returns a precise valuation in milliseconds.</p>
+      </div>
+      <div class="step-arrow" aria-hidden="true">→</div>
+      <div class="step" data-aos="fade-up" data-aos-delay="200">
+        <div class="step-num">03</div>
+        <h3>AI dashboard renders</h3>
+        <p>Price, range band, confidence, market insight, investment rating, and recommended action — all at once.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       PREDICT SECTION
+  ═══════════════════════════════════════════ -->
+  <section id="predict" class="predict-section">
+    <div class="section-head center" data-aos="fade-up">
+      <span class="eyebrow">AI Prediction Console</span>
+      <h2>Analyze a property now</h2>
+    </div>
+
+    <div class="predict-layout">
+
+      <!-- Form card -->
+      <div class="predict-form-wrap glass" data-aos="fade-right" data-aos-duration="800">
+        <div class="form-header">
+          <div class="form-header-left">
+            <span class="form-label">Property Input</span>
+            <span class="api-status"><span class="dot"></span>API Live</span>
+          </div>
+          <!-- Quick-fill demos -->
+          <div class="demo-pills">
+            <button type="button" class="demo-pill" data-demo="budget">
+              <i data-lucide="wallet"></i> Budget
+            </button>
+            <button type="button" class="demo-pill" data-demo="mid">
+              <i data-lucide="building-2"></i> Mid
+            </button>
+            <button type="button" class="demo-pill" data-demo="luxury">
+              <i data-lucide="gem"></i> Luxury
+            </button>
+          </div>
+        </div>
+
+        <!-- Error box -->
+        <div id="error-box" class="error-box hidden" role="alert" aria-live="assertive"></div>
+
+        <form id="predict-form" autocomplete="off" novalidate>
+          <div class="form-grid">
+
+            <label class="field-wrap">
+              <span class="field-label"><i data-lucide="bed-double"></i> Bedrooms</span>
+              <div class="input-row">
+                <input name="number of bedrooms" type="number" min="1" max="20" step="1" placeholder="3" required>
+                <span class="unit">rooms</span>
+              </div>
+            </label>
+
+            <label class="field-wrap">
+              <span class="field-label"><i data-lucide="bath"></i> Bathrooms</span>
+              <div class="input-row">
+                <input name="number of bathrooms" type="number" min="0.5" max="10" step="0.25" placeholder="2" required>
+                <span class="unit">baths</span>
+              </div>
+            </label>
+
+            <label class="field-wrap">
+              <span class="field-label"><i data-lucide="move"></i> Living Area</span>
+              <div class="input-row">
+                <input name="living area" type="number" min="200" max="15000" step="10" placeholder="1800" required>
+                <span class="unit">sq ft</span>
+              </div>
+            </label>
+
+            <label class="field-wrap">
+              <span class="field-label"><i data-lucide="scan"></i> Lot Area</span>
+              <div class="input-row">
+                <input name="lot area" type="number" min="400" max="1100000" step="100" placeholder="5000" required>
+                <span class="unit">sq ft</span>
+              </div>
+            </label>
+
+            <label class="field-wrap">
+              <span class="field-label"><i data-lucide="layers-3"></i> Floors</span>
+              <div class="input-row">
+                <input name="number of floors" type="number" min="1" max="4" step="0.5" placeholder="2" required>
+                <span class="unit">levels</span>
+              </div>
+            </label>
+
+            <label class="field-wrap">
+              <span class="field-label"><i data-lucide="badge-check"></i> Condition</span>
+              <div class="input-row">
+                <select name="condition of the house" required>
+                  <option value="">Select...</option>
+                  <option value="1">1 — Poor</option>
+                  <option value="2">2 — Fair</option>
+                  <option value="3">3 — Average</option>
+                  <option value="4">4 — Good</option>
+                  <option value="5">5 — Excellent</option>
+                </select>
+                <span class="unit">score</span>
+              </div>
+            </label>
+
+            <label class="field-wrap">
+              <span class="field-label"><i data-lucide="calendar"></i> Built Year</span>
+              <div class="input-row">
+                <input name="Built Year" type="number" min="1900" max="2026" step="1" placeholder="2015" required>
+                <span class="unit">year</span>
+              </div>
+            </label>
+
+            <label class="field-wrap">
+              <span class="field-label"><i data-lucide="map-pin"></i> Postal Code</span>
+              <div class="input-row">
+                <input name="Postal Code" type="number" min="100000" max="999999" step="1" placeholder="122006" required>
+                <span class="unit">6 digits</span>
+              </div>
+            </label>
+
+            <label class="field-wrap">
+              <span class="field-label"><i data-lucide="school"></i> Schools Nearby</span>
+              <div class="input-row">
+                <input name="Number of schools nearby" type="number" min="0" max="10" step="1" placeholder="2" required>
+                <span class="unit">count</span>
+              </div>
+            </label>
+
+            <label class="field-wrap">
+              <span class="field-label"><i data-lucide="plane"></i> Airport Distance</span>
+              <div class="input-row">
+                <input name="Distance from the airport" type="number" min="1" max="200" step="1" placeholder="45" required>
+                <span class="unit">km</span>
+              </div>
+            </label>
+
+          </div><!-- /form-grid -->
+
+          <button class="predict-btn" id="predict-btn" type="submit">
+            <span class="predict-btn-inner">
+              <span class="btn-icon"><i data-lucide="zap"></i></span>
+              <span class="btn-text">Predict Price</span>
+              <span class="btn-loader" aria-hidden="true"></span>
+            </span>
+          </button>
+        </form>
+      </div><!-- /form wrap -->
+
+      <!-- Result stack -->
+      <div class="result-stack" data-aos="fade-left" data-aos-duration="800">
+
+        <!-- Skeleton -->
+        <div id="result-skeleton" class="skeleton-card glass hidden" aria-hidden="true">
+          <div class="skel skel-h2"></div>
+          <div class="skel skel-line"></div>
+          <div class="skel skel-line short"></div>
+          <div class="skel-grid">
+            <div class="skel skel-box"></div>
+            <div class="skel skel-box"></div>
+            <div class="skel skel-box"></div>
+          </div>
+        </div>
+
+        <!-- Main result card -->
+        <div class="result-card glass" id="result-card">
+          <div class="result-header">
+            <div>
+              <span class="eyebrow">AI Result</span>
+              <div class="price-display" id="result-price">Awaiting input</div>
+            </div>
+            <span class="category-pill" id="category-pill">Ready</span>
+          </div>
+          <p class="result-subtitle" id="result-text">Submit property details to generate an enterprise prediction.</p>
+
+          <div class="range-band hidden" id="range-card">
+            <div class="range-label">
+              <span id="result-tier">—</span>
+              <strong id="result-range">—</strong>
+            </div>
+            <div class="range-bar">
+              <div class="range-fill" id="range-fill"></div>
+            </div>
+          </div>
+
+          <div class="metric-chips">
+            <div class="chip">
+              <span>Confidence</span>
+              <strong id="confidence-score">—</strong>
+            </div>
+            <div class="chip">
+              <span>Trend</span>
+              <strong id="market-trend">—</strong>
+            </div>
+            <div class="chip">
+              <span>Rating</span>
+              <strong id="investment-rating">—</strong>
+            </div>
+          </div>
+
+          <div class="insight-box" id="insight-box">
+            <div class="insight-label"><i data-lucide="sparkles"></i> AI Insight</div>
+            <p id="market-insight">Your smart market insight will appear here after prediction.</p>
+            <div class="recommendation" id="recommended-action">Recommended action pending.</div>
+          </div>
+
+          <div class="result-actions">
+            <button id="export-report" class="action-btn" type="button">
+              <i data-lucide="download"></i> Export
+            </button>
+            <button id="share-result" class="action-btn" type="button">
+              <i data-lucide="share-2"></i> Share
+            </button>
+            <button id="save-result" class="action-btn" type="button">
+              <i data-lucide="bookmark"></i> Save
+            </button>
+          </div>
+        </div>
+
+        <!-- History card -->
+        <div class="history-card glass">
+          <div class="history-header">
+            <h3><i data-lucide="history"></i> Prediction History</h3>
+            <button id="clear-history" class="text-btn" type="button">Clear</button>
+          </div>
+          <div id="history-list" class="history-list">
+            <p class="empty-msg">No predictions yet.</p>
+          </div>
+        </div>
+
+      </div><!-- /result-stack -->
+    </div><!-- /predict-layout -->
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       MODEL INTELLIGENCE
+  ═══════════════════════════════════════════ -->
+  <section id="model" class="model-section">
+    <div class="section-head center" data-aos="fade-up">
+      <span class="eyebrow">Model Intelligence</span>
+      <h2>What drives the valuation</h2>
+    </div>
+    <div class="model-grid">
+      <div class="model-info glass" data-aos="fade-right">
+        <span class="eyebrow">Model Metadata</span>
+        <div class="big-score">{{ metrics.r2 }}<span>%</span></div>
+        <p>R² accuracy score across the holdout test set. Model uses {{ model_meta.feature_count }} validated input signals.</p>
+        <div class="meta-list">
+          <div class="meta-row">
+            <span>Algorithm</span>
+            <strong>{{ model_meta.model_name }}</strong>
+          </div>
+          <div class="meta-row">
+            <span>Version</span>
+            <strong>v{{ model_meta.model_version }}</strong>
+          </div>
+          <div class="meta-row">
+            <span>Training Date</span>
+            <strong>{{ model_meta.training_date }}</strong>
+          </div>
+          <div class="meta-row">
+            <span>Features</span>
+            <strong>{{ model_meta.feature_count }} signals</strong>
+          </div>
+          <div class="meta-row">
+            <span>API Status</span>
+            <strong class="status-ok"><span class="dot"></span> Healthy</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card glass" data-aos="fade-left">
+        <span class="eyebrow">Feature Importance</span>
+        <h3>Valuation drivers ranked</h3>
+        <div class="chart-wrap">
+          <canvas id="importance-chart" aria-label="Feature importance bar chart" role="img"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       STACK
+  ═══════════════════════════════════════════ -->
+  <section id="stack" class="stack-section">
+    <div class="section-head center" data-aos="fade-up">
+      <span class="eyebrow">Technical Stack</span>
+      <h2>Clean architecture.<br>Production-grade deployment.</h2>
+    </div>
+    <div class="stack-grid">
+      <div class="stack-card" data-aos="fade-up">
+        <i data-lucide="flask-conical"></i>
+        <strong>Flask Blueprints</strong>
+        <span>Prediction routes separated from app factory with Blueprint registration pattern.</span>
+      </div>
+      <div class="stack-card" data-aos="fade-up" data-aos-delay="80">
+        <i data-lucide="brain-circuit"></i>
+        <strong>Model Service</strong>
+        <span>Centralized loading, prediction, metadata, logging, and health monitoring in one service.</span>
+      </div>
+      <div class="stack-card" data-aos="fade-up" data-aos-delay="160">
+        <i data-lucide="shield-alert"></i>
+        <strong>Validator Layer</strong>
+        <span>Professional payload checks, cross-field realism rules, and structured error responses.</span>
+      </div>
+      <div class="stack-card" data-aos="fade-up" data-aos-delay="240">
+        <i data-lucide="cloud-cog"></i>
+        <strong>Render Ready</strong>
+        <span>Deploys to Render via <code>gunicorn app:app</code> with rotating logs and prediction JSONL output.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════════ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a class="logo" href="#home">
+          <span class="logo-icon">⬡</span>
+          PriceWise<strong>India</strong>
+        </a>
+        <p>AI-powered real estate prediction platform. Enterprise ML serving, smart validation, and premium SaaS UX.</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/" target="_blank" rel="noreferrer noopener">
+          <i data-lucide="github"></i> GitHub
+        </a>
+        <a href="https://render.com/" target="_blank" rel="noreferrer noopener">
+          <i data-lucide="cloud"></i> Render
+        </a>
+        <a href="#predict">
+          <i data-lucide="zap"></i> Predict
+        </a>
+      </div>
+    </div>
+    <p class="footer-copy">© 2026 PriceWise India. Built with Flask, scikit-learn &amp; passion.</p>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════
+       FLOATING ELEMENTS
+  ═══════════════════════════════════════════ -->
+
+  <!-- AI Chatbot popup -->
+  <button id="chatbot-toggle" class="chatbot-fab" type="button" aria-label="Open AI assistant">
+    <i data-lucide="bot"></i>
+  </button>
+  <div id="chatbot-panel" class="chatbot-panel glass hidden">
+    <div class="chatbot-header">
+      <span><i data-lucide="sparkles"></i> AI Assistant</span>
+      <button id="chatbot-close" class="icon-btn" type="button" aria-label="Close assistant">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <p>Ask about valuation signals, confidence scores, or investment tiers.</p>
+    <div class="chat-suggestion" onclick="handleChatSuggestion(this)">Why is living area the top feature?</div>
+    <div class="chat-suggestion" onclick="handleChatSuggestion(this)">What makes a Luxury property?</div>
+    <div class="chat-suggestion" onclick="handleChatSuggestion(this)">How is confidence score calculated?</div>
+  </div>
+
+  <!-- Back to top -->
+  <button id="back-to-top" class="back-top" type="button" aria-label="Back to top">
+    <i data-lucide="arrow-up"></i>
+  </button>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Feature importance data injected by Flask -->
+  <script type="application/json" id="feature-importance-data">{{ feat_imp | tojson }}</script>
+
+  <!-- App JS — served by Flask -->
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
